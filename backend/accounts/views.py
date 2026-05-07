@@ -56,37 +56,47 @@ class ProfileUpdateView(APIView):
     def patch(self, request):
         user = request.user
 
+        # Common fields
         user.first_name = request.data.get('first_name', user.first_name)
         user.last_name = request.data.get('last_name', user.last_name)
-        user.email = request.data.get('email', user.email)
         user.phone = request.data.get('phone', user.phone)
         user.location = request.data.get('location', user.location)
         user.bio = request.data.get('bio', user.bio)
-        user.education = request.data.get('education', user.education)
-        user.experience = request.data.get('experience', user.experience)
 
-        # Skills — stored as JSON string
-        skills = request.data.get('skills', None)
-        if skills is not None:
-            if isinstance(skills, list):
-                user.skills = json.dumps(skills)
-            elif isinstance(skills, str):
-                try:
-                    json.loads(skills)  # validate JSON
-                    user.skills = skills
-                except Exception:
-                    pass
-
-        # Profile picture — field name is profile_picture in model
         if 'profile_pic' in request.FILES:
             user.profile_picture = request.FILES['profile_pic']
+
+        # Seeker specific fields
+        if user.role == 'seeker':
+            user.education = request.data.get('education', user.education)
+            user.experience = request.data.get('experience', user.experience)
+
+            skills = request.data.get('skills', None)
+            if skills is not None:
+                if isinstance(skills, list):
+                    user.skills = json.dumps(skills)
+                elif isinstance(skills, str):
+                    try:
+                        json.loads(skills)
+                        user.skills = skills
+                    except Exception:
+                        pass
+
+        # Employer specific fields
+        if user.role == 'employer':
+            user.company_name = request.data.get('company_name', user.company_name)
+            user.company_website = request.data.get('company_website', user.company_website)
+            user.company_description = request.data.get('company_description', user.company_description)
+            user.industry = request.data.get('industry', user.industry)
+            user.company_size = request.data.get('company_size', user.company_size)
+            if 'company_logo' in request.FILES:
+                user.company_logo = request.FILES['company_logo']
 
         user.save()
         return Response({
             'message': 'Profile updated successfully',
             'user': UserSerializer(user, context={'request': request}).data
         })
-
 
 class ResumeUploadView(APIView):
     permission_classes = [IsAuthenticated]

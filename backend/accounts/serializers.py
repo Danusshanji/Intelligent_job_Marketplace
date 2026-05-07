@@ -25,6 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
     resume_name = serializers.SerializerMethodField()
     applications_count = serializers.SerializerMethodField()
     profile_pic_url = serializers.SerializerMethodField()
+    company_logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -33,7 +34,10 @@ class UserSerializer(serializers.ModelSerializer):
             'email', 'role', 'phone', 'location', 'bio',
             'skills', 'education', 'experience',
             'profile_pic_url', 'resume', 'resume_name',
-            'applications_count'
+            'applications_count',
+            # Employer fields
+            'company_name', 'company_website', 'company_description',
+            'industry', 'company_size', 'company_logo_url',
         ]
 
     def get_skills(self, obj):
@@ -52,15 +56,27 @@ class UserSerializer(serializers.ModelSerializer):
         return None
 
     def get_profile_pic_url(self, obj):
+        request = self.context.get('request')
         if obj.profile_picture:
-            request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.profile_picture.url)
             return obj.profile_picture.url
         return None
 
+    def get_company_logo_url(self, obj):
+        request = self.context.get('request')
+        if obj.company_logo:
+            if request:
+                return request.build_absolute_uri(obj.company_logo.url)
+            return obj.company_logo.url
+        return None
+
     def get_applications_count(self, obj):
         try:
+            if obj.role == 'employer':
+            # Count jobs posted by this employer
+                from jobs.models import Job
+                return Job.objects.filter(employer=obj).count()
             return obj.applications.count()
         except Exception:
             return 0

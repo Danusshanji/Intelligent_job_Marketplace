@@ -45,10 +45,11 @@ function SeekerDashboard() {
   };
 
   const getMatchColor = (score) => {
-    if (score >= 15) return { bg: '#dcfce7', color: '#15803d', label: 'Strong Match' };
-    if (score >= 8) return { bg: '#fef9c3', color: '#854d0e', label: 'Good Match' };
-    return { bg: '#fee2e2', color: '#991b1b', label: 'Partial Match' };
-  };
+  if (score >= 60) return { bg: '#dcfce7', color: '#15803d', label: 'Strong Match' };
+  if (score >= 40) return { bg: '#dbeafe', color: '#1d4ed8', label: 'Good Match' };
+  if (score >= 25) return { bg: '#fef9c3', color: '#854d0e', label: 'Fair Match' };
+  return { bg: '#fee2e2', color: '#991b1b', label: 'Partial Match' };
+};
 
   const displayJobs = activeTab === 'recommended' ? recommendations : jobs;
 

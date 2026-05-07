@@ -80,9 +80,10 @@ function EmployerDashboard() {
   };
 
   const getMatchStyle = (score) => {
-    if (score >= 15) return { bg: '#dcfce7', color: '#15803d', label: 'Strong Match', dot: '#16a34a' };
-    if (score >= 8) return { bg: '#fef9c3', color: '#854d0e', label: 'Good Match', dot: '#ca8a04' };
-    return { bg: '#fee2e2', color: '#991b1b', label: 'Partial Match', dot: '#dc2626' };
+  if (score >= 60) return { bg: '#dcfce7', color: '#15803d', label: 'Strong Match', dot: '#16a34a' };
+  if (score >= 40) return { bg: '#dbeafe', color: '#1d4ed8', label: 'Good Match', dot: '#1d4ed8' };
+  if (score >= 25) return { bg: '#fef9c3', color: '#854d0e', label: 'Fair Match', dot: '#ca8a04' };
+  return { bg: '#fee2e2', color: '#991b1b', label: 'Partial Match', dot: '#dc2626' };
   };
 
   const inputStyle = {

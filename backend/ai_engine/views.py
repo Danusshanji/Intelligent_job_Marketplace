@@ -54,13 +54,11 @@ class JobRecommendationsView(APIView):
 
 
 class CandidateRankingView(APIView):
-    """Returns AI-ranked candidates for a specific job posting."""
     permission_classes = [IsAuthenticated]
 
     def get(self, request, job_id):
         user = request.user
 
-        # Only employers can access this
         if user.role != 'employer':
             return Response(
                 {'error': 'Only employers can access candidate rankings.'},
@@ -75,7 +73,6 @@ class CandidateRankingView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Get all applications for this job
         applications = Application.objects.filter(job=job).select_related('applicant')
 
         job_data = {
@@ -87,6 +84,13 @@ class CandidateRankingView(APIView):
         apps_data = []
         for app in applications:
             resume_path = app.applicant.resume.path if app.applicant.resume else None
+            resume_url = None
+            if app.applicant.resume:
+                try:
+                    resume_url = request.build_absolute_uri(app.applicant.resume.url)
+                except Exception:
+                    resume_url = None
+
             apps_data.append({
                 'id': app.id,
                 'applicant_id': app.applicant.id,
@@ -96,11 +100,12 @@ class CandidateRankingView(APIView):
                 'applied_at': str(app.applied_at),
                 'cover_letter': app.cover_letter,
                 'resume_path': resume_path,
+                'resume_url': resume_url,
             })
 
         ranked = rank_candidates_for_job(job_data, apps_data)
 
-        # Remove resume_path from response (internal only)
+        # Remove resume_path but keep resume_url
         for r in ranked:
             r.pop('resume_path', None)
 

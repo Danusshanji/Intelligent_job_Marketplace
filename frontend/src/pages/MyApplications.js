@@ -27,16 +27,16 @@ function MyApplications() {
     localStorage.removeItem('user');
     navigate('/login');
   };
-
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'applied': return { bg: '#dbeafe', color: '#1d4ed8', label: 'Applied' };
-      case 'shortlisted': return { bg: '#dcfce7', color: '#15803d', label: 'Shortlisted' };
-      case 'hired': return { bg: '#ede9fe', color: '#6d28d9', label: 'Hired' };
-      case 'rejected': return { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' };
-      default: return { bg: '#f3f4f6', color: '#374151', label: status };
-    }
-  };
+const getStatusStyle = (status) => {
+  switch (status) {
+    case 'applied': return { bg: '#dbeafe', color: '#1d4ed8', label: 'Applied' };
+    case 'shortlisted': return { bg: '#dcfce7', color: '#15803d', label: 'Shortlisted' };
+    case 'interview_scheduled': return { bg: '#fef9c3', color: '#854d0e', label: 'Interview Scheduled' };
+    case 'hired': return { bg: '#ede9fe', color: '#6d28d9', label: 'Hired' };
+    case 'rejected': return { bg: '#fee2e2', color: '#dc2626', label: 'Rejected' };
+    default: return { bg: '#f3f4f6', color: '#374151', label: status };
+  }
+};
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -61,6 +61,14 @@ function MyApplications() {
           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       );
+      case 'interview_scheduled': return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+    );
       default: return null;
     }
   };
@@ -364,42 +372,46 @@ function MyApplications() {
 
                   {/* Status Timeline */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
-                    {['applied', 'shortlisted', 'hired'].map((step, i) => {
-                      const isActive = app.status === step;
-                      const isPast = ['applied', 'shortlisted', 'hired'].indexOf(app.status) > i;
-                      const isRejected = app.status === 'rejected';
+                  {['applied', 'shortlisted', 'interview_scheduled', 'hired'].map((step, i) => {
+                    const steps = ['applied', 'shortlisted', 'interview_scheduled', 'hired'];
+                    const currentIndex = steps.indexOf(app.status);
+                    const stepIndex = i;
+                    const isActive = app.status === step;
+                    const isPast = currentIndex > stepIndex;
+                    const isCompleted = isActive || isPast;
+                    const isRejected = app.status === 'rejected';
                       return (
                         <React.Fragment key={step}>
                           <div style={{
                             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
                           }}>
-                            <div style={{
-                              width: 28, height: 28, borderRadius: '50%',
-                              background: isRejected ? '#fee2e2' : isActive ? '#4f46e5' : isPast ? '#10b981' : '#e5e7eb',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              border: isActive ? '2px solid #4f46e5' : 'none',
-                            }}>
-                              {(isActive || isPast) && !isRejected ? (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                              ) : isRejected ? (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                                </svg>
-                              ) : (
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#9ca3af' }} />
-                              )}
-                            </div>
-                            <span style={{ fontSize: '10px', color: isActive ? '#4f46e5' : isPast ? '#10b981' : '#9ca3af', fontWeight: 600, textTransform: 'capitalize' }}>
-                              {step}
-                            </span>
+                              <div style={{
+                                width: 28, height: 28, borderRadius: '50%',
+                                background: isRejected ? '#fee2e2' : isCompleted ? (isActive ? '#4f46e5' : '#10b981') : '#e5e7eb',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: isActive ? '2px solid #4f46e5' : 'none',
+                              }}>
+                                {isCompleted && !isRejected ? (
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                  </svg>
+                                ) : isRejected ? (
+                                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                  </svg>
+                                ) : (
+                                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#9ca3af' }} />
+                                )}
+                              </div>
+                           <span style={{ fontSize: '10px', color: isActive ? '#4f46e5' : isPast ? '#10b981' : '#9ca3af', fontWeight: 700 }}>
+                              {step === 'interview_scheduled' ? 'Interview' : step}
+                          </span>
                           </div>
                           {i < 2 && (
                             <div style={{
-                              flex: 1, height: '2px', marginBottom: '16px',
-                              background: isPast && !isRejected ? '#10b981' : '#e5e7eb',
-                            }} />
+                            flex: 1, height: '2px', marginBottom: '16px',
+                            background: (isPast || isActive) && !isRejected ? '#10b981' : '#e5e7eb',
+                          }} />
                           )}
                         </React.Fragment>
                       );
